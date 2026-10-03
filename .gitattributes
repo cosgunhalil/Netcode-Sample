@@ -1,0 +1,70 @@
+# Normalize line endings for text files
+* text=auto
+
+# Code
+*.cs text diff=csharp
+*.shader text
+*.hlsl text
+*.cginc text
+*.compute text
+*.json text
+*.md text
+*.asmdef text
+*.asmref text
+*.inputactions text
+*.uss text
+*.uxml text
+
+# Unity YAML (Unity always writes LF)
+*.anim text eol=lf
+*.asset text eol=lf
+*.controller text eol=lf
+*.lighting text eol=lf
+*.mask text eol=lf
+*.mat text eol=lf
+*.meta text eol=lf
+*.overrideController text eol=lf
+*.physicMaterial text eol=lf
+*.playable text eol=lf
+*.prefab text eol=lf
+*.preset text eol=lf
+*.shadergraph text eol=lf
+*.shadersubgraph text eol=lf
+*.signal text eol=lf
+*.spriteatlas text eol=lf
+*.terrainlayer text eol=lf
+*.unity text eol=lf
+*.vfx text eol=lf
+*.wlt text eol=lf
+
+# Binary assets stored in Git LFS
+# Images
+*.png filter=lfs diff=lfs merge=lfs -text
+*.jpg filter=lfs diff=lfs merge=lfs -text
+*.jpeg filter=lfs diff=lfs merge=lfs -text
+*.psd filter=lfs diff=lfs merge=lfs -text
+*.tga filter=lfs diff=lfs merge=lfs -text
+*.tif filter=lfs diff=lfs merge=lfs -text
+*.tiff filter=lfs diff=lfs merge=lfs -text
+*.exr filter=lfs diff=lfs merge=lfs -text
+*.hdr filter=lfs diff=lfs merge=lfs -text
+# Audio
+*.wav filter=lfs diff=lfs merge=lfs -text
+*.mp3 filter=lfs diff=lfs merge=lfs -text
+*.ogg filter=lfs diff=lfs merge=lfs -text
+*.aif filter=lfs diff=lfs merge=lfs -text
+# Video
+*.mp4 filter=lfs diff=lfs merge=lfs -text
+*.mov filter=lfs diff=lfs merge=lfs -text
+# 3D models
+*.fbx filter=lfs diff=lfs merge=lfs -text
+*.obj filter=lfs diff=lfs merge=lfs -text
+*.blend filter=lfs diff=lfs merge=lfs -text
+# Fonts
+*.ttf filter=lfs diff=lfs merge=lfs -text
+*.otf filter=lfs diff=lfs merge=lfs -text
+# Native libraries and archives
+*.dll filter=lfs diff=lfs merge=lfs -text
+*.so filter=lfs diff=lfs merge=lfs -text
+*.a filter=lfs diff=lfs merge=lfs -text
+*.zip filter=lfs diff=lfs merge=lfs -text
