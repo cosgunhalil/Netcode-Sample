@@ -7,7 +7,10 @@
         "DPF.Core",
         "DPF.Unity",
         "DPF.Editor",
-        "Unity.AI.Navigation"
+        "Unity.AI.Navigation",
+        "NetcodeSample.Simulation",
+        "NetcodeSample.Determinism",
+        "Tickwise.Runtime"
     ],
     "includePlatforms": [
         "Editor"

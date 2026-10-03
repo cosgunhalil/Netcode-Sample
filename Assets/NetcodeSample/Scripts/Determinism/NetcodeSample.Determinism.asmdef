@@ -4,6 +4,7 @@
     "references": [
         "NetcodeSample.Simulation",
         "NetcodeSample.Rollback",
+        "DPF.Core",
         "Tickwise.Runtime"
     ],
     "includePlatforms": [],
@@ -14,5 +15,5 @@
     "autoReferenced": false,
     "defineConstraints": [],
     "versionDefines": [],
-    "noEngineReferences": false
+    "noEngineReferences": true
 }

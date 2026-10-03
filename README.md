@@ -60,6 +60,34 @@ The sample has one level, built in the editor and saved with the scene. To rebui
 
 Rebuilding replaces the previous level. Both peers must run the same build of the level; its DPF navmesh checksum is logged by the command.
 
+## Measuring determinism with Tickwise
+
+Every hot-seat session is recorded to `<persistentDataPath>/tickwise/hotseat-<time>.rec`: both players' inputs and a state hash for every tick, a full hash every 30 ticks, and a field-by-field state dump every 150 ticks. Open the folder with **Netcode Sample > Tickwise > Open Recordings Folder**.
+
+**Self-check (one machine).** Run **Netcode Sample > Tickwise > Self-Check Recording...** and pick a recording. It replays the recorded inputs through a fresh simulation and checks every tick's hash, then writes the replay as `<name>.replay.rec` and runs `tickwise compare` on the two. A deterministic simulation reports *identical*.
+
+**Catch a planted bug.** The hot-seat readout has a **Chaos** button. It plants a realistic determinism bug from the next tick: newly spawned cubes take their spawn offset from the wall clock instead of the spawn counter, so a replay puts them somewhere else. Play a little with chaos on, stop, and self-check that recording. Tickwise names the tick and the fields:
+
+```text
+verdict  first divergence at tick 121, caught by the light hash, confirmed by the full hash at tick 150
+tick 150  9 differences over 699 fields
+  exact   units[10].position.x: 161008 versus 70805
+  exact   units[11].position.x: -1539743 versus -1586102
+  ...
+```
+
+The self-check runs `tickwise diff --at <first dump tick after the divergence>` for you. By hand:
+
+```bash
+tickwise compare a.rec b.rec
+```
+
+```bash
+tickwise diff a.rec b.rec --at 150
+```
+
+Exit codes: 0 identical, 1 different, 2 error. Recordings are only comparable when made with the same game rules and level; each one stores their hashes in its build description.
+
 ## Getting started
 
 1. Clone the repository and run `git lfs pull`.

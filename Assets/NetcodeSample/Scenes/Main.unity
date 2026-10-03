@@ -7455,6 +7455,9 @@ MonoBehaviour:
   _rules: {fileID: 11400000, guid: 01829707bfc3244409663691109ae73c, type: 2}
   _useBurstNavigation: 1
   _frameCameraOnStart: 1
+  _record: 1
+  _chaos: 0
+  _chaosFromTick: 300
 --- !u!4 &1680394454
 Transform:
   m_ObjectHideFlags: 0

@@ -10,7 +10,8 @@
         "NetcodeSample.UI",
         "DPF.Core",
         "DPF.Unity",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "Tickwise.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

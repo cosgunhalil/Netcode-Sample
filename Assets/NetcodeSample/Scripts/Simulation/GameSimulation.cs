@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using DPF.Core.Hashing;
 using DPF.Core.Numerics;
 using DPF.Core.Simulation;
@@ -87,6 +88,12 @@ namespace NetcodeSample.Simulation
         public int SnapshotSize { get; }
 
         public ulong NavMeshChecksum => _navigation.NavMeshChecksum;
+
+        /// <summary>
+        /// A deliberately planted determinism bug for demonstrating Tickwise. Not part of the state: a peer (or a
+        /// replay) without it diverges from one with it. Never enable outside the demo.
+        /// </summary>
+        public ChaosSettings Chaos { get; set; }
 
         /// <summary>What happened during the last <see cref="Step"/>.</summary>
         public IReadOnlyList<GameEvent> Events => _events;
@@ -222,8 +229,14 @@ namespace NetcodeSample.Simulation
         {
             ulong* values = stackalloc ulong[2];
             values[0] = ComputeLightHash();
-            values[1] = _navigation.ComputeHash();
+            values[1] = ComputeNavigationHash();
             return XxHash64.Hash((byte*)values, 2 * sizeof(ulong), 0);
+        }
+
+        /// <summary>The hash of the whole navigation state (agents, paths, flow fields).</summary>
+        public ulong ComputeNavigationHash()
+        {
+            return _navigation.ComputeHash();
         }
 
         public void Dispose()
@@ -305,7 +318,15 @@ namespace NetcodeSample.Simulation
 
             UnitStats stats = _rules.GetStats(kind);
             FP3 basePosition = _level.GetBasePosition(team);
-            FP2 offset = s_spawnOffsets[teamState.SpawnCounter % SpawnOffsetCount];
+            int offsetIndex = teamState.SpawnCounter % SpawnOffsetCount;
+            if (Chaos.Enabled && _match.Tick >= Chaos.FromTick)
+            {
+                // THE PLANTED BUG: "variety" taken from the wall clock. Two machines (or a recording and its
+                // replay) read different clock values, so the same spawn lands in a different place.
+                offsetIndex = (int)((ulong)Stopwatch.GetTimestamp() % SpawnOffsetCount);
+            }
+
+            FP2 offset = s_spawnOffsets[offsetIndex];
             FP3 position = new(basePosition.X + offset.X, basePosition.Y, basePosition.Z + offset.Y);
             teamState.SpawnCounter++;
             teamState.UnitCount++;
