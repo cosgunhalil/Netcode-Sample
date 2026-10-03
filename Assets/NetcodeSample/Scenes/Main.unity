@@ -7354,6 +7354,7 @@ MonoBehaviour:
   _networkManager: {fileID: 1996270023}
   _level: {fileID: 11400000, guid: 5d049dbeb812aaf43aaaf85bb17c3f52, type: 2}
   _rules: {fileID: 11400000, guid: 01829707bfc3244409663691109ae73c, type: 2}
+  _presentation: {fileID: 11400000, guid: 413c20ad01ed2d74fa98a548cc539b85, type: 2}
   _address: 127.0.0.1
   _port: 7770
   _hostTeam: 0
@@ -7512,6 +7513,7 @@ MonoBehaviour:
   _mode: 2
   _level: {fileID: 11400000, guid: 5d049dbeb812aaf43aaaf85bb17c3f52, type: 2}
   _rules: {fileID: 11400000, guid: 01829707bfc3244409663691109ae73c, type: 2}
+  _presentation: {fileID: 0}
   _useBurstNavigation: 1
   _frameCameraOnStart: 1
   _record: 1

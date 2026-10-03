@@ -1,6 +1,7 @@
 using System.IO;
 using DPF.Unity;
 using NetcodeSample.Determinism;
+using NetcodeSample.Presentation;
 using NetcodeSample.Rollback;
 using NetcodeSample.Simulation;
 using NetcodeSample.Simulation.Navigation;
@@ -38,6 +39,9 @@ namespace NetcodeSample.Game.Local
 
         [SerializeField]
         private GameRulesAsset _rules;
+
+        [SerializeField]
+        private PresentationSettings _presentation;
 
         [SerializeField]
         [Tooltip("Burst runs navigation on Unity's job system; off uses the single-threaded managed world. Both give identical results.")]
@@ -95,7 +99,7 @@ namespace NetcodeSample.Game.Local
         private SyncTestSession _syncTest;
         private LoopbackNetwork _network;
         private double _networkClock;
-        private PlaceholderView _view;
+        private MatchPresenter _presenter;
         private float _tickSeconds;
         private float _accumulator;
 
@@ -104,9 +108,9 @@ namespace NetcodeSample.Game.Local
 
         private void Start()
         {
-            if (_level == null || _rules == null)
+            if (_level == null || _rules == null || _presentation == null)
             {
-                Debug.LogError("LocalMatchRunner needs a Level Definition and Game Rules. Run Netcode Sample > Set Up Local Match Scene.", this);
+                Debug.LogError("LocalMatchRunner needs a Level Definition, Game Rules and Presentation Settings. Run Netcode Sample > Set Up Local Match Scene.", this);
                 enabled = false;
                 return;
             }
@@ -119,10 +123,12 @@ namespace NetcodeSample.Game.Local
             {
                 case LocalMatchMode.HotSeat:
                     _peers[0] = CreatePeer(TickwiseSupport.CreateRecordingPath("hotseat"));
+                    _presenter = new MatchPresenter(_peers[0].Simulation, _presentation);
                     break;
                 case LocalMatchMode.SyncTest:
                     _peers[0] = CreatePeer(TickwiseSupport.CreateRecordingPath("synctest"));
                     _syncTest = new SyncTestSession(_peers[0].Simulation, _syncTestDistance);
+                    _presenter = new MatchPresenter(_peers[0].Simulation, _presentation);
                     break;
                 case LocalMatchMode.Loopback:
                     StartLoopback();
@@ -130,7 +136,6 @@ namespace NetcodeSample.Game.Local
             }
 
             ApplyChaos(_chaos, _chaosFromTick);
-            _view = new PlaceholderView(ViewedSimulation);
             if (_frameCameraOnStart)
             {
                 CameraFraming.FrameBases(_levelData);
@@ -161,7 +166,15 @@ namespace NetcodeSample.Game.Local
                     }
                 }
 
-                peer.Session = new RollbackSession(peer.Simulation, (Team)team, transport, settings, peer.ConfirmedRecorder);
+                // The viewed peer's presenter follows its (re)simulated ticks, so corrections can be smoothed.
+                ITickObserver observer = peer.ConfirmedRecorder;
+                if ((Team)team == _viewedPeer)
+                {
+                    _presenter = new MatchPresenter(peer.Simulation, _presentation);
+                    observer = new CompositeTickObserver(peer.ConfirmedRecorder, _presenter);
+                }
+
+                peer.Session = new RollbackSession(peer.Simulation, (Team)team, transport, settings, observer);
                 _peers[team] = peer;
             }
         }
@@ -204,7 +217,7 @@ namespace NetcodeSample.Game.Local
             while (_accumulator >= _tickSeconds && steps < MaxStepsPerFrame)
             {
                 RunTick();
-                _view.Capture(ViewedSimulation);
+                _presenter.Present();
                 _accumulator -= _tickSeconds;
                 steps++;
             }
@@ -214,7 +227,7 @@ namespace NetcodeSample.Game.Local
                 _accumulator = Mathf.Min(_accumulator, _tickSeconds);
             }
 
-            _view.Render(_accumulator / _tickSeconds);
+            _presenter.Render(_accumulator / _tickSeconds, Time.deltaTime);
         }
 
         private void RunTick()
@@ -239,6 +252,7 @@ namespace NetcodeSample.Game.Local
                     }
 
                     peer.Recorder?.RecordTick(red, blue);
+                    _presenter.OnTickSimulated(peer.Simulation.Tick);
                     break;
                 }
 
@@ -265,7 +279,7 @@ namespace NetcodeSample.Game.Local
 
         private void OnDestroy()
         {
-            _view?.Destroy();
+            _presenter?.Dispose();
             foreach (Peer peer in _peers)
             {
                 peer?.Dispose(this);

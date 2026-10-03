@@ -58,6 +58,7 @@ namespace NetcodeSample.Editor
             serialized.FindProperty("_networkManager").objectReferenceValue = networkManager;
             serialized.FindProperty("_level").objectReferenceValue = level;
             serialized.FindProperty("_rules").objectReferenceValue = rules;
+            serialized.FindProperty("_presentation").objectReferenceValue = PresentationAssets.LoadOrCreate();
             serialized.ApplyModifiedProperties();
 
             SetActive(networkManager.gameObject, true);

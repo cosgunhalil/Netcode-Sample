@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e95e1a4750f1ec94cb2dc98eaada5b7e, type: 3}
+  m_Name: Presentation
+  m_EditorClassIdentifier: NetcodeSample.Presentation::NetcodeSample.Presentation.PresentationSettings
+  _unitMaterial: {fileID: 2100000, guid: 0110d58d34a43c7498ade233307e038a, type: 2}
+  _fadeMaterial: {fileID: 2100000, guid: b753895a61cfeee48836e5a65c74c4f5, type: 2}
+  _baseMaterial: {fileID: 2100000, guid: e33a74966be31e84cb8536e1de2f3c8b, type: 2}
+  _effectMaterial: {fileID: 2100000, guid: 24ab7b2f381be3740b939bc2893228ac, type: 2}
+  _barMaterial: {fileID: 2100000, guid: 7627d872534f2024a8087faf023bdd8f, type: 2}
+  _redColor: {r: 0.92, g: 0.22, b: 0.2, a: 1}
+  _blueColor: {r: 0.2, g: 0.45, b: 0.95, a: 1}
+  _woundedTint: {r: 0.12, g: 0.12, b: 0.14, a: 1}
+  _barBackground: {r: 0.08, g: 0.08, b: 0.1, a: 1}
+  _correctionHalfLife: 0.05
+  _snapDistance: 3
+  _spawnPopSeconds: 0.15
+  _fadeSeconds: 0.25
+  _effectSeconds: 0.45
+  _attackPulse: 0.18
+  _turnSpeed: 720

@@ -11,7 +11,9 @@
         "NetcodeSample.Simulation",
         "NetcodeSample.Determinism",
         "Tickwise.Runtime",
-        "FishNet.Runtime"
+        "FishNet.Runtime",
+        "NetcodeSample.Presentation",
+        "Unity.RenderPipelines.Universal.Editor"
     ],
     "includePlatforms": [
         "Editor"

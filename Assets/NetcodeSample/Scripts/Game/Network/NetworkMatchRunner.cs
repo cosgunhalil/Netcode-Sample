@@ -2,8 +2,8 @@ using System.IO;
 using DPF.Unity;
 using FishNet.Managing;
 using NetcodeSample.Determinism;
-using NetcodeSample.Game.Local;
 using NetcodeSample.Networking;
+using NetcodeSample.Presentation;
 using NetcodeSample.Rollback;
 using NetcodeSample.Simulation;
 using UnityEngine;
@@ -31,6 +31,9 @@ namespace NetcodeSample.Game.Network
 
         [SerializeField]
         private GameRulesAsset _rules;
+
+        [SerializeField]
+        private PresentationSettings _presentation;
 
         [Header("Connection")]
         [SerializeField]
@@ -82,7 +85,7 @@ namespace NetcodeSample.Game.Network
         private FishNetPeer _peer;
         private RollbackSession _session;
         private ConfirmedTickRecorder _recorder;
-        private PlaceholderView _view;
+        private MatchPresenter _presenter;
         private float _tickSeconds;
         private float _accumulator;
         private bool _pendingSpawnBig;
@@ -90,9 +93,9 @@ namespace NetcodeSample.Game.Network
 
         private void Start()
         {
-            if (_networkManager == null || _level == null || _rules == null)
+            if (_networkManager == null || _level == null || _rules == null || _presentation == null)
             {
-                Debug.LogError("NetworkMatchRunner needs a Network Manager, Level Definition and Game Rules. Run Netcode Sample > Set Up Network Match Scene.", this);
+                Debug.LogError("NetworkMatchRunner needs a Network Manager, Level Definition, Game Rules and Presentation Settings. Run Netcode Sample > Set Up Network Match Scene.", this);
                 enabled = false;
                 return;
             }
@@ -151,8 +154,8 @@ namespace NetcodeSample.Game.Network
                 }
             }
 
-            _session = new RollbackSession(_simulation, _peer.LocalTeam, _peer, _peer.Settings, _recorder);
-            _view = new PlaceholderView(_simulation);
+            _presenter = new MatchPresenter(_simulation, _presentation);
+            _session = new RollbackSession(_simulation, _peer.LocalTeam, _peer, _peer.Settings, new CompositeTickObserver(_recorder, _presenter));
             Debug.Log($"Network match {_peer.SessionId}: playing {_peer.LocalTeam} as {(_peer.IsHost ? "host" : "joiner")}, input delay {_peer.Settings.InputDelayTicks}, max rollback {_peer.Settings.MaxRollbackTicks}.", this);
         }
 
@@ -185,7 +188,7 @@ namespace NetcodeSample.Game.Network
                     _pendingSpawnBig = false;
                 }
 
-                _view.Capture(_simulation);
+                _presenter.Present();
                 _accumulator -= _tickSeconds;
                 steps++;
             }
@@ -195,7 +198,7 @@ namespace NetcodeSample.Game.Network
                 _accumulator = Mathf.Min(_accumulator, _tickSeconds);
             }
 
-            _view.Render(_accumulator / _tickSeconds);
+            _presenter.Render(_accumulator / _tickSeconds, Time.deltaTime);
         }
 
         // Finishes the recording and resets to the menu with a fresh simulation.
@@ -209,8 +212,8 @@ namespace NetcodeSample.Game.Network
 
         private void TearDown()
         {
-            _view?.Destroy();
-            _view = null;
+            _presenter?.Dispose();
+            _presenter = null;
             if (_recorder != null)
             {
                 Debug.Log($"Tickwise: recorded {_recorder.Recorder.TicksRecorded} confirmed ticks to {_recorder.Recorder.Path}", this);
