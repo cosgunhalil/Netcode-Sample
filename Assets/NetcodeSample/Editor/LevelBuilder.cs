@@ -166,6 +166,18 @@ namespace NetcodeSample.Editor
                     AssetDatabase.DeleteAsset(path);
                 }
             }
+
+            // CRG names each new bake uniquely (" 1", " 2", ...); a fixed name keeps rebuilds a plain change in git.
+            string currentPath = current != null ? AssetDatabase.GetAssetPath(current) : null;
+            string stablePath = $"{bakeFolder}/CRG-NavMesh-{LevelRootName}.asset";
+            if (!string.IsNullOrEmpty(currentPath) && currentPath != stablePath)
+            {
+                string error = AssetDatabase.MoveAsset(currentPath, stablePath);
+                if (!string.IsNullOrEmpty(error))
+                {
+                    Debug.LogWarning($"Build Level: could not rename {currentPath} to {stablePath}: {error}");
+                }
+            }
         }
 
         private static bool TryGetBasePosition(CRGLevelData.RoomData room, string team, out Vector3 position)
