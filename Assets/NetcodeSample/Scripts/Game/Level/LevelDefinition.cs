@@ -1,6 +1,7 @@
 using System;
 using DPF.Core.Numerics;
 using DPF.Unity;
+using NetcodeSample.Simulation;
 using UnityEngine;
 
 namespace NetcodeSample.Game
@@ -41,6 +42,17 @@ namespace NetcodeSample.Game
         public int GenerationSeed => _generationSeed;
 
         public int RoomCount => _roomCount;
+
+        /// <summary>The engine-free level description the simulation is created from.</summary>
+        public LevelData CreateLevelData()
+        {
+            if (_navMesh == null || _navMesh.Data == null || _navMesh.Data.Length == 0)
+            {
+                throw new InvalidOperationException($"{name} has no navmesh. Run Netcode Sample > Build Level.");
+            }
+
+            return new LevelData(_navMesh.Data, RedBase, BlueBase);
+        }
 
         /// <summary>Called by the level builder after a successful build.</summary>
         public void Set(DPFNavMeshAsset navMesh, FP3 redBase, FP3 blueBase, int generationSeed, int roomCount)

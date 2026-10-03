@@ -5,6 +5,8 @@
         "NetcodeSample.Simulation",
         "NetcodeSample.Rollback",
         "NetcodeSample.Determinism",
+        "DPF.Unity",
+        "NetcodeSample.Game",
         "DPF.Core",
         "Tickwise.Runtime",
         "UnityEngine.TestRunner",
