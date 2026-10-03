@@ -2,6 +2,7 @@
   "dependencies": {
     "com.cosgunhalil.connected-rooms-generator": "https://github.com/cosgunhalil/Connected-Rooms-Generator.git",
     "com.cosgunhalil.deterministic-path-finding": "https://github.com/cosgunhalil/Deterministic-Path-Finding.git",
+    "com.cosgunhalil.tickwise": "https://github.com/cosgunhalil/Tickwise.git?path=bridges/unity/com.cosgunhalil.tickwise#b95fd019b7f567fda9427bf77e6a135b539e115b",
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask#2.5.11",
     "com.firstgeargames.fishnet": "https://github.com/FirstGearGames/FishNet.git?path=Assets/FishNet#4.7.3",
     "com.unity.ai.navigation": "2.0.11",

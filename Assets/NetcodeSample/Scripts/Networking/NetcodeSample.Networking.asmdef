@@ -1,0 +1,18 @@
+{
+    "name": "NetcodeSample.Networking",
+    "rootNamespace": "NetcodeSample.Networking",
+    "references": [
+        "NetcodeSample.Simulation",
+        "NetcodeSample.Rollback",
+        "FishNet.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

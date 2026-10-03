@@ -1,0 +1,16 @@
+{
+    "name": "NetcodeSample.Simulation",
+    "rootNamespace": "NetcodeSample.Simulation",
+    "references": [
+        "DPF.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}

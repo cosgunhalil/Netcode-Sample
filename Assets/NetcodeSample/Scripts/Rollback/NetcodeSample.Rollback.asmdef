@@ -1,0 +1,16 @@
+{
+    "name": "NetcodeSample.Rollback",
+    "rootNamespace": "NetcodeSample.Rollback",
+    "references": [
+        "NetcodeSample.Simulation"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}

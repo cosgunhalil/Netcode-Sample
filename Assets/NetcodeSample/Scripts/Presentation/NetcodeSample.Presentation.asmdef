@@ -1,0 +1,19 @@
+{
+    "name": "NetcodeSample.Presentation",
+    "rootNamespace": "NetcodeSample.Presentation",
+    "references": [
+        "NetcodeSample.Simulation",
+        "NetcodeSample.Rollback",
+        "DPF.Core",
+        "DPF.Unity"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

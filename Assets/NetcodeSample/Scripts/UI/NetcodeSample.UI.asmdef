@@ -1,0 +1,21 @@
+{
+    "name": "NetcodeSample.UI",
+    "rootNamespace": "NetcodeSample.UI",
+    "references": [
+        "NetcodeSample.Simulation",
+        "NetcodeSample.Presentation",
+        "hannibal-runtime-assembly-definitions",
+        "UniTask",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

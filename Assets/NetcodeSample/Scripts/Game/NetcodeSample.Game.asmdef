@@ -1,0 +1,24 @@
+{
+    "name": "NetcodeSample.Game",
+    "rootNamespace": "NetcodeSample.Game",
+    "references": [
+        "NetcodeSample.Simulation",
+        "NetcodeSample.Rollback",
+        "NetcodeSample.Networking",
+        "NetcodeSample.Determinism",
+        "NetcodeSample.Presentation",
+        "NetcodeSample.UI",
+        "DPF.Core",
+        "DPF.Unity",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

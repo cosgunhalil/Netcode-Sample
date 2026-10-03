@@ -87,6 +87,13 @@ desktop.ini
 /[Aa]ssets/[Pp]lugins/[Dd]emigiant.meta
 /[Aa]ssets/[Pp]lugins.meta
 /[Aa]ssets/[Rr]esources/DOTweenSettings.asset*
+# Resources only holds DOTween settings for now; un-ignore if the project adds its own Resources
+/[Aa]ssets/[Rr]esources.meta
+
+# Tickwise native library is built locally (see README.md, tools/build-tickwise.ps1)
+/.tickwise-build/
+/[Aa]ssets/[Pp]lugins/[Tt]ickwise/
+/[Aa]ssets/[Pp]lugins/[Tt]ickwise.meta
 
 # Claude Code guidance lives in ../common-project-rules/netcode-sample-brain
 /CLAUDE.md

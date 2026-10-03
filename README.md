@@ -7,6 +7,7 @@ A two-player, peer-to-peer, deterministic rollback netcode sample built with Uni
 - Unity **6000.3.11f1** (Unity 6.3)
 - Git with [Git LFS](https://git-lfs.com/) (binary assets are stored in LFS)
 - [DOTween](#dotween-manual-install) installed locally (not included in this repository)
+- [Rust](https://rustup.rs) 1.88 or newer, to build the [Tickwise native library](#tickwise-local-build) and install its CLI
 
 ## Dependencies
 
@@ -19,6 +20,7 @@ Unity Package Manager installs these automatically from `Packages/manifest.json`
 | [Connected Rooms Generator](https://github.com/cosgunhalil/Connected-Rooms-Generator) | git, `main` | Procedural room generation |
 | [HannibalUI](https://github.com/cosgunhalil/HannibalUI) | git, `master` | User interface |
 | [UniTask](https://github.com/Cysharp/UniTask) | git, tag `2.5.11` | Required by HannibalUI |
+| [Tickwise](https://github.com/cosgunhalil/Tickwise) | git, pinned commit | Recording and comparing simulation hashes to measure determinism |
 | [ParrelSync](https://github.com/VeriorPies/ParrelSync) | git, tag `1.5.3` | Running a second editor (clone) to test two peers locally |
 | ProBuilder `6.1.2` | Unity registry | Required by Connected Rooms Generator |
 | AI Navigation | Unity registry | NavMesh baking for room generation and pathfinding |
@@ -36,9 +38,22 @@ HannibalUI depends on [DOTween](https://github.com/Demigiant/dotween), which is 
 3. Enable **Create ASMDEF** and apply. This creates the `DOTween.Modules` assembly definition that HannibalUI references.
 4. Wait for Unity to recompile; the console should have no errors.
 
+### Tickwise (local build)
+
+The Tickwise Unity package has no prebuilt binaries yet, so its native library `tickwise_ffi.dll` is built locally and **not versioned** (`Assets/Plugins/Tickwise/` is git-ignored). Without it the project compiles, but recording fails at runtime with `DllNotFoundException`.
+
+With the Unity Editor **closed** (it locks the DLL once loaded), run from the repository root:
+
+```powershell
+./tools/build-tickwise.ps1 -InstallCli
+```
+
+The script reads the Tickwise commit pinned in `Packages/manifest.json`, builds the library from that commit into `.tickwise-build/`, and copies it to `Assets/Plugins/Tickwise/x86_64/`. `-InstallCli` also installs the `tickwise` command line tool from the same commit. Install it this way rather than from crates.io, whose release can't read the state dumps the Unity package records. Run the script again whenever the pinned commit changes.
+
 ## Getting started
 
 1. Clone the repository and run `git lfs pull`.
 2. Open the project folder with Unity 6000.3.11f1 through Unity Hub. Package Manager resolves the dependencies on first open.
 3. Install [DOTween](#dotween-manual-install).
-4. Open `Assets/Scenes/SampleScene.unity`.
+4. Close Unity and build [Tickwise](#tickwise-local-build).
+5. Open `Assets/Scenes/SampleScene.unity`.
