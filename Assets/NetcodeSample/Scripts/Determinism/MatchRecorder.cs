@@ -102,6 +102,34 @@ namespace NetcodeSample.Determinism
             _recorder.RecordMarker((ulong)_simulation.Tick, label);
         }
 
+        public bool WantsFullHash(long tick) => _recorder.WantsFullHash((ulong)tick);
+
+        public bool WantsDump(long tick) => _recorder.WantsDump((ulong)tick);
+
+        /// <summary>
+        /// Records a tick from hashes (and a dump) computed earlier, when the tick was simulated: under rollback a
+        /// tick is confirmed after the simulation has moved past it. <paramref name="dump"/> is required on ticks
+        /// where <see cref="WantsDump"/> is true.
+        /// </summary>
+        public void RecordComputedTick(long tick, GameInput red, GameInput blue, ulong lightHash, ulong fullHash, TickwiseDump dump)
+        {
+            Span<byte> inputs = stackalloc byte[2];
+            inputs[0] = red.Buttons;
+            inputs[1] = blue.Buttons;
+            _recorder.RecordTick((ulong)tick, inputs, lightHash, fullHash);
+            if (dump != null)
+            {
+                _recorder.RecordDump((ulong)tick, dump);
+            }
+
+            TicksRecorded++;
+        }
+
+        public void RecordMarker(long tick, string label)
+        {
+            _recorder.RecordMarker((ulong)tick, label);
+        }
+
         /// <summary>Writes the index and trailer; a file without them can't be read.</summary>
         public void Dispose()
         {

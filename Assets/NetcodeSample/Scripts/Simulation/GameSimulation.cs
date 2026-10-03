@@ -110,7 +110,14 @@ namespace NetcodeSample.Simulation
 
             // Agent i owns request slot i.
             config.MaxRequests = maxAgents;
-            config.MaxPathLength = 128;
+
+            // Sized for rollback, which snapshots the whole state every tick: units follow the shared flow fields
+            // and only search short paths while chasing an enemy within the acquire radius. These four bring the
+            // navigation state from ~5 MB to ~1 MB at 512 agents.
+            config.MaxPathLength = 32;
+            config.MaxCorners = 16;
+            config.MaxSearchNodes = 512;
+            config.MaxConcurrentSearches = 4;
             config.MaxCommandsPerTick = MaxCommandsPerTick(maxAgents);
             config.MaxFlowFields = FlowFieldCount;
             config.TickDuration = rules.TickDuration;

@@ -3,7 +3,7 @@ using DPF.Unity;
 using NetcodeSample.Simulation;
 using UnityEngine;
 
-namespace NetcodeSample.Game.HotSeat
+namespace NetcodeSample.Game.Local
 {
     /// <summary>
     /// Minimal visuals for the simulation until the real presentation layer exists: primitive cubes and bases,

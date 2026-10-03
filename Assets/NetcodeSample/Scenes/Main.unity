@@ -7433,7 +7433,7 @@ GameObject:
   - component: {fileID: 1680394454}
   - component: {fileID: 1680394453}
   m_Layer: 0
-  m_Name: Hot-Seat
+  m_Name: Local Match
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7451,13 +7451,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88a0ddd2fd27f2541b391ca43c8062f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: NetcodeSample.Game::NetcodeSample.Game.HotSeat.HotSeatRunner
+  _mode: 2
   _level: {fileID: 11400000, guid: 5d049dbeb812aaf43aaaf85bb17c3f52, type: 2}
   _rules: {fileID: 11400000, guid: 01829707bfc3244409663691109ae73c, type: 2}
   _useBurstNavigation: 1
   _frameCameraOnStart: 1
   _record: 1
-  _chaos: 0
+  _chaos: 1
   _chaosFromTick: 300
+  _syncTestDistance: 7
+  _inputDelayTicks: 2
+  _maxRollbackTicks: 8
+  _latencyMs: 80
+  _jitterMs: 30
+  _packetLoss: 0.05
+  _viewedPeer: 0
 --- !u!4 &1680394454
 Transform:
   m_ObjectHideFlags: 0

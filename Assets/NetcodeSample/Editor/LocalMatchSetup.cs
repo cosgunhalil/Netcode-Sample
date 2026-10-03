@@ -1,5 +1,5 @@
 using NetcodeSample.Game;
-using NetcodeSample.Game.HotSeat;
+using NetcodeSample.Game.Local;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -7,33 +7,39 @@ using UnityEngine.SceneManagement;
 
 namespace NetcodeSample.Editor
 {
-    /// <summary>Adds a configured <see cref="HotSeatRunner"/> to the open scene, creating the game rules asset if needed.</summary>
-    public static class HotSeatSetup
+    /// <summary>Adds a configured <see cref="LocalMatchRunner"/> to the open scene, creating the game rules asset if needed.</summary>
+    public static class LocalMatchSetup
     {
         private const string SettingsFolder = "Assets/NetcodeSample/Settings";
         private const string GameRulesPath = SettingsFolder + "/GameRules.asset";
         private const string LevelDefinitionPath = "Assets/NetcodeSample/Level/Level.asset";
-        private const string RunnerName = "Hot-Seat";
+        private const string RunnerName = "Local Match";
 
-        [MenuItem("Netcode Sample/Set Up Hot-Seat Scene")]
+        [MenuItem("Netcode Sample/Set Up Local Match Scene")]
         public static void SetUp()
         {
             LevelDefinition level = AssetDatabase.LoadAssetAtPath<LevelDefinition>(LevelDefinitionPath);
             if (level == null)
             {
-                Debug.LogError($"Set Up Hot-Seat Scene: {LevelDefinitionPath} not found. Run Netcode Sample > Build Level first.");
+                Debug.LogError($"Set Up Local Match Scene: {LevelDefinitionPath} not found. Run Netcode Sample > Build Level first.");
                 return;
             }
 
             GameRulesAsset rules = LoadOrCreateRules();
             Scene scene = SceneManager.GetActiveScene();
 
-            HotSeatRunner runner = Object.FindAnyObjectByType<HotSeatRunner>();
+            LocalMatchRunner runner = Object.FindAnyObjectByType<LocalMatchRunner>();
             if (runner == null)
             {
                 GameObject gameObject = new(RunnerName);
-                Undo.RegisterCreatedObjectUndo(gameObject, "Set Up Hot-Seat Scene");
-                runner = gameObject.AddComponent<HotSeatRunner>();
+                Undo.RegisterCreatedObjectUndo(gameObject, "Set Up Local Match Scene");
+                runner = gameObject.AddComponent<LocalMatchRunner>();
+            }
+
+            if (runner.gameObject.name != RunnerName)
+            {
+                Undo.RecordObject(runner.gameObject, "Set Up Local Match Scene");
+                runner.gameObject.name = RunnerName;
             }
 
             SerializedObject serialized = new(runner);
@@ -44,7 +50,7 @@ namespace NetcodeSample.Editor
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             Selection.activeObject = runner;
-            Debug.Log("Set Up Hot-Seat Scene: press Play. Space spawns a red big cube, Enter a blue one.", runner);
+            Debug.Log("Set Up Local Match Scene: pick a Mode on the Local Match object (HotSeat, SyncTest, Loopback) and press Play. Space spawns a red big cube, Enter a blue one.", runner);
         }
 
         private static GameRulesAsset LoadOrCreateRules()
