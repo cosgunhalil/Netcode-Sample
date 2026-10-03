@@ -129,7 +129,8 @@ PluginImporter:
   assetBundleName:
   assetBundleVariant:
 '@
-    [System.IO.File]::WriteAllText($metaPath, ($meta -replace "`r`n", "`n"))
+    # Here-strings drop the final line break, and Unity's YAML parser rejects a .meta without one.
+    [System.IO.File]::WriteAllText($metaPath, ($meta -replace "`r`n", "`n") + "`n")
 }
 
 Write-Host "Copied $dllName to $pluginDirectory"

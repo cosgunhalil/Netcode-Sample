@@ -1,0 +1,23 @@
+{
+    "name": "NetcodeSample.Editor",
+    "rootNamespace": "NetcodeSample.Editor",
+    "references": [
+        "NetcodeSample.Game",
+        "CRG.Runtime",
+        "DPF.Core",
+        "DPF.Unity",
+        "DPF.Editor",
+        "Unity.AI.Navigation"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

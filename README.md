@@ -50,10 +50,20 @@ With the Unity Editor **closed** (it locks the DLL once loaded), run from the re
 
 The script reads the Tickwise commit pinned in `Packages/manifest.json`, builds the library from that commit into `.tickwise-build/`, and copies it to `Assets/Plugins/Tickwise/x86_64/`. `-InstallCli` also installs the `tickwise` command line tool from the same commit. Install it this way rather than from crates.io, whose release can't read the state dumps the Unity package records. Run the script again whenever the pinned commit changes.
 
+## Level
+
+The sample has one level, built in the editor and saved with the scene. To rebuild it, open `Main.unity` and run **Netcode Sample > Build Level**. The command:
+
+1. Generates connected rooms with Connected Rooms Generator, using the settings and fixed seed in `Assets/NetcodeSample/Level/LevelGeneration.asset`.
+2. Bakes the Unity NavMesh and converts it to a deterministic DPF navmesh (`Level/DPF-NavMesh.asset`).
+3. Places the red base in the start room and the blue base in the room farthest from it, and stores both positions as fixed-point values in `Level/Level.asset`.
+
+Rebuilding replaces the previous level. Both peers must run the same build of the level; its DPF navmesh checksum is logged by the command.
+
 ## Getting started
 
 1. Clone the repository and run `git lfs pull`.
 2. Open the project folder with Unity 6000.3.11f1 through Unity Hub. Package Manager resolves the dependencies on first open.
 3. Install [DOTween](#dotween-manual-install).
 4. Close Unity and build [Tickwise](#tickwise-local-build).
-5. Open `Assets/Scenes/SampleScene.unity`.
+5. Open `Assets/NetcodeSample/Scenes/Main.unity`.

@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3a590ba49cefed4996e70ec24def707, type: 3}
+  m_Name: LevelGeneration
+  m_EditorClassIdentifier: CRG.Runtime::CRG.Generation.GenerationParametersAsset
+  parameters:
+    GridType: 0
+    CellSize: 10
+    WallHeight: 3
+    DoorHeight: 2.5
+    DoorWidthRatio: 0.4
+    WallThickness: 0
+    AddCeiling: 0
+    CeilingChance: 1
+    MinCellsPerRoom: 2
+    MaxCellsPerRoom: 4
+    TargetRoomCount: 7
+    StartPosition:
+      x: 0
+      y: 0
+      variant: 0
+    MinConnectionsPerRoom: 1
+    MaxConnectionsPerRoom: 6
+    ReserveConnectionForGrowth: 1
+    LayoutBias: 1
+    LoopChance: 0.25
+    HexagonWeight: 1
+    SquareWeight: 1
+    TriangleWeight: 1
+    OctagonSquareWeight: 1
+    AddMeshCollider: 0
+    BakeNavMesh: 1
+    NavMeshAgentTypeID: 0
+    NavMeshGeometry: 0
+    CreateSpawnPoints: 1
+    RandomSeed: 20261003
+    MaxIterations: 1000
+    MaxRetriesPerRoom: 3
