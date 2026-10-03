@@ -133,7 +133,7 @@ namespace NetcodeSample.Game.Local
             _view = new PlaceholderView(ViewedSimulation);
             if (_frameCameraOnStart)
             {
-                FrameCamera();
+                CameraFraming.FrameBases(_levelData);
             }
 
             Debug.Log($"{_mode} started: rules hash {_gameRules.ComputeHash():X16}, navmesh checksum {ViewedSimulation.NavMeshChecksum:X16}, snapshot {ViewedSimulation.SnapshotSize / 1024} KiB.", this);
@@ -367,22 +367,6 @@ namespace NetcodeSample.Game.Local
         private static GameInput ToInput(bool spawnBig)
         {
             return spawnBig ? GameInput.SpawnBig : GameInput.None;
-        }
-
-        private void FrameCamera()
-        {
-            Camera camera = Camera.main;
-            if (camera == null)
-            {
-                return;
-            }
-
-            Vector3 red = _levelData.GetBasePosition(Team.Red).ToVector3();
-            Vector3 blue = _levelData.GetBasePosition(Team.Blue).ToVector3();
-            Vector3 center = (red + blue) * 0.5f;
-            float span = Vector3.Distance(red, blue);
-            camera.transform.position = center + new Vector3(0f, span * 0.9f, -span * 0.35f);
-            camera.transform.LookAt(center);
         }
 
         private sealed class Peer

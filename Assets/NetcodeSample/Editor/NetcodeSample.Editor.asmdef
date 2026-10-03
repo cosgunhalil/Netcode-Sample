@@ -10,7 +10,8 @@
         "Unity.AI.Navigation",
         "NetcodeSample.Simulation",
         "NetcodeSample.Determinism",
-        "Tickwise.Runtime"
+        "Tickwise.Runtime",
+        "FishNet.Runtime"
     ],
     "includePlatforms": [
         "Editor"

@@ -1,5 +1,7 @@
 using NetcodeSample.Game;
+using FishNet.Managing;
 using NetcodeSample.Game.Local;
+using NetcodeSample.Game.Network;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -28,7 +30,7 @@ namespace NetcodeSample.Editor
             GameRulesAsset rules = LoadOrCreateRules();
             Scene scene = SceneManager.GetActiveScene();
 
-            LocalMatchRunner runner = Object.FindAnyObjectByType<LocalMatchRunner>();
+            LocalMatchRunner runner = Object.FindAnyObjectByType<LocalMatchRunner>(FindObjectsInactive.Include);
             if (runner == null)
             {
                 GameObject gameObject = new(RunnerName);
@@ -46,6 +48,20 @@ namespace NetcodeSample.Editor
             serialized.FindProperty("_level").objectReferenceValue = level;
             serialized.FindProperty("_rules").objectReferenceValue = rules;
             serialized.ApplyModifiedProperties();
+
+            // The scene runs one mode at a time.
+            NetworkMatchSetup.SetActive(runner.gameObject, true);
+            NetworkMatchRunner networkRunner = Object.FindAnyObjectByType<NetworkMatchRunner>(FindObjectsInactive.Include);
+            if (networkRunner != null)
+            {
+                NetworkMatchSetup.SetActive(networkRunner.gameObject, false);
+            }
+
+            NetworkManager networkManager = Object.FindAnyObjectByType<NetworkManager>(FindObjectsInactive.Include);
+            if (networkManager != null)
+            {
+                NetworkMatchSetup.SetActive(networkManager.gameObject, false);
+            }
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);

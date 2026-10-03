@@ -11,7 +11,8 @@
         "DPF.Core",
         "DPF.Unity",
         "Unity.InputSystem",
-        "Tickwise.Runtime"
+        "Tickwise.Runtime",
+        "FishNet.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
