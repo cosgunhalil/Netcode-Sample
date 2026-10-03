@@ -50,6 +50,11 @@ namespace NetcodeSample.Game
         private float _roundRestartPause = 3f;
 
         [SerializeField]
+        [Min(0f)]
+        [Tooltip("Seconds a round may last (0 = no limit). At the limit the healthier base wins, then the side with more cubes; otherwise it's a draw.")]
+        private float _roundTimeLimit = 120f;
+
+        [SerializeField]
         private UnitStatsSettings _small = new()
         {
             Health = 50,
@@ -87,6 +92,7 @@ namespace NetcodeSample.Game
                 AcquireRadius = _acquireRadius.ToFP(),
                 BaseRadius = _baseRadius.ToFP(),
                 RoundRestartPause = _roundRestartPause.ToFP(),
+                RoundTimeLimit = _roundTimeLimit.ToFP(),
                 Small = _small.ToStats(),
                 Big = _big.ToStats(),
             };

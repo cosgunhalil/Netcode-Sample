@@ -157,6 +157,34 @@ namespace NetcodeSample.Tests.EditMode
             Assert.That(simulation.GetTeam(Team.Blue).Score, Is.EqualTo(blueScore), "Scores survive the reset.");
         }
 
+        [Test]
+        public void TimeLimit_EndsTheRoundOnTheTiebreak()
+        {
+            GameRules rules = GameRules.Default;
+            rules.RoundTimeLimit = FP.FromInt(5);
+            using GameSimulation simulation = new(rules, _level, new ManagedNavigationWorldFactory());
+
+            // After 5 s both bases are untouched and both sides have spawned the same cubes: a draw, at the limit.
+            RoundResult result = RoundResult.None;
+            long endTick = 0;
+            for (int i = 0; i < 300 && result == RoundResult.None; i++)
+            {
+                simulation.Step(GameInput.None, GameInput.None);
+                foreach (GameEvent gameEvent in simulation.Events)
+                {
+                    if (gameEvent.Type == GameEventType.RoundEnded)
+                    {
+                        result = (RoundResult)gameEvent.Amount;
+                        endTick = simulation.Tick;
+                    }
+                }
+            }
+
+            Assert.That(endTick, Is.EqualTo(rules.RoundTimeLimitTicks));
+            Assert.That(result, Is.EqualTo(RoundResult.Draw));
+            Assert.That(simulation.GetTeam(Team.Red).Score + simulation.GetTeam(Team.Blue).Score, Is.Zero);
+        }
+
         private static void StepScripted(GameSimulation simulation)
         {
             // Both sides press at different, fixed rhythms so the inputs aren't symmetric.

@@ -26,6 +26,7 @@ namespace NetcodeSample.Determinism
             ref readonly MatchState match = ref _simulation.Match;
             dump.SetInt64("match.tick", match.Tick);
             dump.SetInt64("match.round", match.Round);
+            dump.SetInt64("match.roundTicks", match.RoundTicks);
             dump.SetInt64("match.roundPauseTicks", match.RoundPauseTicks);
             dump.SetString("match.lastRoundResult", match.LastRoundResult.ToString());
 

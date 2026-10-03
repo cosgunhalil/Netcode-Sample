@@ -18,7 +18,7 @@ MonoBehaviour:
     WallHeight: 3
     DoorHeight: 2.5
     DoorWidthRatio: 0.4
-    WallThickness: 0
+    WallThickness: 0.5
     AddCeiling: 0
     CeilingChance: 1
     MinCellsPerRoom: 2

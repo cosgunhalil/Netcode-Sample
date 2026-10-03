@@ -40,6 +40,13 @@ namespace NetcodeSample.Simulation
         /// <summary>A unit whose edge comes within this distance of the enemy base centre explodes on it.</summary>
         public FP BaseRadius;
         public FP RoundRestartPause;
+
+        /// <summary>
+        /// A round that lasts this long ends: the healthier base wins, then the side with more cubes; otherwise a draw.
+        /// Zero means no limit.
+        /// </summary>
+        public FP RoundTimeLimit;
+
         public UnitStats Small;
         public UnitStats Big;
 
@@ -53,6 +60,7 @@ namespace NetcodeSample.Simulation
             AcquireRadius = FP.Two,
             BaseRadius = FP.FromRatio(3, 2),
             RoundRestartPause = FP.FromInt(3),
+            RoundTimeLimit = FP.FromInt(120),
             Small = new UnitStats
             {
                 Health = 50,
@@ -77,6 +85,8 @@ namespace NetcodeSample.Simulation
 
         public int RoundRestartPauseTicks => ToTicks(RoundRestartPause).RoundToInt();
 
+        public int RoundTimeLimitTicks => ToTicks(RoundTimeLimit).RoundToInt();
+
         /// <summary>A duration in ticks. Exact: multiplying by the integer tick rate never rounds (0.25 s = 7.5 ticks at 30 Hz).</summary>
         public FP ToTicks(FP seconds) => seconds * FP.FromInt(TickRate);
 
@@ -97,9 +107,9 @@ namespace NetcodeSample.Simulation
             {
                 error = "MaxUnitsPerTeam must be 1 to 2048.";
             }
-            else if (SmallSpawnInterval <= FP.Zero || BigCooldown < FP.Zero || RoundRestartPause < FP.Zero)
+            else if (SmallSpawnInterval <= FP.Zero || BigCooldown < FP.Zero || RoundRestartPause < FP.Zero || RoundTimeLimit < FP.Zero)
             {
-                error = "SmallSpawnInterval must be positive; BigCooldown and RoundRestartPause can't be negative.";
+                error = "SmallSpawnInterval must be positive; BigCooldown, RoundRestartPause and RoundTimeLimit can't be negative.";
             }
             else if (!IsValid(Small) || !IsValid(Big))
             {
@@ -112,7 +122,7 @@ namespace NetcodeSample.Simulation
         /// <summary>A hash of every rule, so peers can refuse to play with different rules.</summary>
         public unsafe ulong ComputeHash()
         {
-            const int FieldCount = 20;
+            const int FieldCount = 21;
             long* values = stackalloc long[FieldCount];
             int index = 0;
             values[index++] = TickRate;
@@ -123,6 +133,7 @@ namespace NetcodeSample.Simulation
             values[index++] = AcquireRadius.RawValue;
             values[index++] = BaseRadius.RawValue;
             values[index++] = RoundRestartPause.RawValue;
+            values[index++] = RoundTimeLimit.RawValue;
             Write(Small, values, ref index);
             Write(Big, values, ref index);
             return XxHash64.Hash((byte*)values, FieldCount * sizeof(long), 0);

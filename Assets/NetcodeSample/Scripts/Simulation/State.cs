@@ -98,6 +98,9 @@ namespace NetcodeSample.Simulation
         public long Tick;
         public int Round;
 
+        /// <summary>Ticks played in the current round, pauses excluded.</summary>
+        public int RoundTicks;
+
         /// <summary>Ticks left in the pause after a round ends; 0 while a round is being played.</summary>
         public int RoundPauseTicks;
         public RoundResult LastRoundResult;

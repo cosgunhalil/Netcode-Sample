@@ -2,7 +2,7 @@
 
 A two-player, peer-to-peer, deterministic rollback netcode sample built with Unity 6.
 
-Red and blue each have a base at opposite ends of a generated level. Small cubes spawn at every base once a second and march to the enemy base, fighting enemy cubes they meet; each player can also spawn a big cube on a cooldown. A cube that reaches the enemy base explodes and damages it by its remaining health. A destroyed base gives the other player a point and starts the next round.
+Red and blue each have a base at opposite ends of a generated level. Small cubes spawn at every base once a second and march to the enemy base, fighting enemy cubes they meet; each player can also spawn a big cube on a cooldown. A cube that reaches the enemy base explodes and damages it by its remaining health. A destroyed base gives the other player a point and starts the next round; after two minutes the healthier base (then the bigger army) wins the round.
 
 ## What it demonstrates
 
@@ -186,7 +186,9 @@ All in `Assets/NetcodeSample/Settings/GameRules.asset` (both peers must use the 
 | Speed | 3 m/s | 2.2 m/s |
 | Spawning | every 1 s | on input, 5 s cooldown |
 
-Base health 1000, base radius 1.5 m, acquire radius 2 m (a cube turns to fight an enemy within it), 3 s between rounds, up to 256 cubes per team, 30 ticks per second. Both bases destroyed on the same tick is a draw (no point).
+Base health 1000, base radius 1.5 m, acquire radius 2 m (a cube turns to fight an enemy within it), 3 s between rounds, up to 256 cubes per team, 30 ticks per second.
+
+**Round time limit, 120 s.** When it runs out, the healthier base wins; with equal health, the side with more cubes; otherwise it's a draw (no point). The HUD shows the clock. Both bases destroyed on the same tick is also a draw. Set *Round Time Limit* to 0 for rounds that only end when a base falls.
 
 Rollback settings are on the *Network Match* (host) and *Local Match* objects; presentation colours, materials and smoothing in `Settings/Presentation.asset`.
 
@@ -226,7 +228,7 @@ Plus [DOTween](#dotween-manual-install) (manual) and the [Tickwise native librar
 
 ## Known issues
 
-- **Balance.** With symmetric spawns small cubes tend to stall in the middle of the map, and once one side's cubes camp near the other's base, its fresh spawns die one by one. Big cubes break stalls; the rules need a balance pass.
+- **Long grinds.** Cubes meet in a front line at the doors and grind each other down; bases usually take damage only once one army collapses, so most rounds go to the time limit and are decided by army size. Two players spawning big cubes at the same rhythm draw.
 - **HannibalUI screen switches.** Switching screens again while a switch is running can leave the earlier screen visible (HannibalUI's `VP_NavigationService.SwitchAsync` continues after cancellation). `MatchUI` works around it by queuing switches and hiding leftover screens, so a screen change can take up to a second.
 - **Recording location.** The project still has Unity's default company name, so recordings go to `AppData/LocalLow/DefaultCompany/netcode-sample/tickwise`.
 - **Windows only.** The Tickwise library is built for Windows x86_64; other platforms need their own build.

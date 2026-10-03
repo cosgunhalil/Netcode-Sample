@@ -116,6 +116,7 @@ namespace NetcodeSample.Editor
                 GridType = GridType.Hexagon,
                 CellSize = 10f,
                 WallHeight = 3f,
+                WallThickness = 0.5f,
 
                 // 4 m doors: after the 0.5 m bake margin on each side, 3 m stay walkable, room for big cubes
                 // (0.6 m radius) to pass each other.

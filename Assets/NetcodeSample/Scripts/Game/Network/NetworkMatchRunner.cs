@@ -306,6 +306,7 @@ namespace NetcodeSample.Game.Network
             {
                 LocalTeam = _peer.LocalTeam,
                 Round = match.Round,
+                RoundSecondsLeft = _gameRules.RoundTimeLimitTicks > 0 ? Mathf.Max(0, _gameRules.RoundTimeLimitTicks - match.RoundTicks) / (float)_gameRules.TickRate : -1f,
                 RedScore = red.Score,
                 BlueScore = blue.Score,
                 RedBaseHealth = red.BaseHealth / (float)_gameRules.BaseHealth,

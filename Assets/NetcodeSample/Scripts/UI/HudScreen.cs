@@ -11,6 +11,9 @@ namespace NetcodeSample.UI
     {
         public Team LocalTeam;
         public int Round;
+
+        /// <summary>Seconds left before the round's time limit; negative when there's no limit.</summary>
+        public float RoundSecondsLeft;
         public int RedScore;
         public int BlueScore;
 
@@ -66,7 +69,8 @@ namespace NetcodeSample.UI
         public void Refresh(in HudState state)
         {
             _scoreText.text = $"<color=#{ColorUtility.ToHtmlStringRGB(UIColors.Red)}>{state.RedScore}</color>  :  <color=#{ColorUtility.ToHtmlStringRGB(UIColors.Blue)}>{state.BlueScore}</color>";
-            _roundText.text = $"Round {state.Round + 1}";
+            string clock = state.RoundSecondsLeft >= 0f ? $"   {(int)state.RoundSecondsLeft / 60}:{(int)state.RoundSecondsLeft % 60:00}" : string.Empty;
+            _roundText.text = $"Round {state.Round + 1}{clock}";
             _youText.text = $"You are {state.LocalTeam.ToString().ToUpperInvariant()}";
             _youText.color = state.LocalTeam == Team.Red ? UIColors.Red : UIColors.Blue;
             _redHealthFill.fillAmount = Mathf.Clamp01(state.RedBaseHealth);

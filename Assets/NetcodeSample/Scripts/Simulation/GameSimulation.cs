@@ -162,6 +162,7 @@ namespace NetcodeSample.Simulation
                 return;
             }
 
+            _match.RoundTicks++;
             UpdateSpawning(Team.Red, red);
             UpdateSpawning(Team.Blue, blue);
             UpdateTargets();
@@ -625,26 +626,34 @@ namespace NetcodeSample.Simulation
 
         private void CheckRoundEnd()
         {
-            bool redDestroyed = _teams[(int)Team.Red].BaseHealth <= 0;
-            bool blueDestroyed = _teams[(int)Team.Blue].BaseHealth <= 0;
-            if (!redDestroyed && !blueDestroyed)
+            ref TeamState red = ref _teams[(int)Team.Red];
+            ref TeamState blue = ref _teams[(int)Team.Blue];
+            bool redDestroyed = red.BaseHealth <= 0;
+            bool blueDestroyed = blue.BaseHealth <= 0;
+            bool timeUp = _rules.RoundTimeLimitTicks > 0 && _match.RoundTicks >= _rules.RoundTimeLimitTicks;
+            if (!redDestroyed && !blueDestroyed && !timeUp)
             {
                 return;
             }
 
-            if (redDestroyed && blueDestroyed)
-            {
-                _match.LastRoundResult = RoundResult.Draw;
-            }
-            else if (blueDestroyed)
+            // Out of time: the healthier base wins, then the bigger army (it was pushing); otherwise a draw.
+            int comparison = redDestroyed || blueDestroyed
+                ? (blueDestroyed ? 1 : 0) - (redDestroyed ? 1 : 0)
+                : red.BaseHealth != blue.BaseHealth ? red.BaseHealth.CompareTo(blue.BaseHealth) : red.UnitCount.CompareTo(blue.UnitCount);
+
+            if (comparison > 0)
             {
                 _match.LastRoundResult = RoundResult.RedWon;
-                _teams[(int)Team.Red].Score++;
+                red.Score++;
+            }
+            else if (comparison < 0)
+            {
+                _match.LastRoundResult = RoundResult.BlueWon;
+                blue.Score++;
             }
             else
             {
-                _match.LastRoundResult = RoundResult.BlueWon;
-                _teams[(int)Team.Blue].Score++;
+                _match.LastRoundResult = RoundResult.Draw;
             }
 
             // The units stop moving from the next tick on (see StopIdleUnits): commands issued after this tick's
@@ -688,6 +697,7 @@ namespace NetcodeSample.Simulation
             ResetUnits();
             ResetTeams(keepScores: true);
             _match.Round++;
+            _match.RoundTicks = 0;
             AddEvent(GameEventType.RoundStarted, Team.Red, 0, FP3.Zero, _match.Round);
         }
 
