@@ -12,7 +12,8 @@
         "DPF.Unity",
         "Unity.InputSystem",
         "Tickwise.Runtime",
-        "FishNet.Runtime"
+        "FishNet.Runtime",
+        "hannibal-runtime-assembly-definitions"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

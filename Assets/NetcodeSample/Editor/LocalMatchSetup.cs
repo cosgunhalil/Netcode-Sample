@@ -2,6 +2,7 @@ using NetcodeSample.Game;
 using FishNet.Managing;
 using NetcodeSample.Game.Local;
 using NetcodeSample.Game.Network;
+using NetcodeSample.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -56,6 +57,12 @@ namespace NetcodeSample.Editor
             if (networkRunner != null)
             {
                 NetworkMatchSetup.SetActive(networkRunner.gameObject, false);
+            }
+
+            MatchUI ui = Object.FindAnyObjectByType<MatchUI>(FindObjectsInactive.Include);
+            if (ui != null)
+            {
+                NetworkMatchSetup.SetActive(ui.gameObject, false);
             }
 
             NetworkManager networkManager = Object.FindAnyObjectByType<NetworkManager>(FindObjectsInactive.Include);

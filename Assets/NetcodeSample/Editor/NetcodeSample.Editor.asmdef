@@ -13,7 +13,11 @@
         "Tickwise.Runtime",
         "FishNet.Runtime",
         "NetcodeSample.Presentation",
-        "Unity.RenderPipelines.Universal.Editor"
+        "Unity.RenderPipelines.Universal.Editor",
+        "NetcodeSample.UI",
+        "hannibal-runtime-assembly-definitions",
+        "UnityEngine.UI",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [
         "Editor"

@@ -74,15 +74,15 @@ Rollback settings: 2 ticks of input delay and up to 8 ticks of rollback by defau
 
 ## Network match (FishNet, peer to peer)
 
-Run **Netcode Sample > Set Up Network Match Scene** once. It adds a FishNet *Network Manager* (Tugboat UDP transport) and the *Network Match* object, and deactivates *Local Match* (**Set Up Local Match Scene** switches back).
+Run **Netcode Sample > Set Up Network Match Scene** once. It adds a FishNet *Network Manager* (Tugboat UDP transport), the *Network Match* object and the *Match UI* (HannibalUI screens), and deactivates *Local Match* (**Set Up Local Match Scene** switches back).
 
-Press Play, then **Host** on one machine and **Join** with the host's address on the other (port 7770 by default; Windows may ask to allow it through the firewall). The host picks its team; the joiner plays the other. Before the match starts the peers compare their game build (rules hash and navmesh checksum) and refuse to play with different ones. Each peer then simulates the whole game; only inputs cross the network, as unreliable FishNet broadcasts. Space spawns your big cube.
+Press Play. In the main menu, **Host** on one machine (choose the port and which team the host plays) and **Join** with the host's address on the other (port 7770 by default; Windows may ask to allow it through the firewall). The host picks its team; the joiner plays the other. Before the match starts the peers compare their game build (rules hash and navmesh checksum) and refuse to play with different ones. Each peer then simulates the whole game; only inputs cross the network, as unreliable FishNet broadcasts. In the match, Space (or the HUD button) spawns your big cube, and the HUD shows both bases' health, the score and your big cube's cooldown. When a round ends a popup shows the result until the next round starts. **F1** shows the netcode overlay: rollback and network statistics, the latency simulator, and the chaos toggle.
 
 FishNet is only the transport here: the host runs a server, the joiner is its single client, and nothing is synchronized through NetworkObjects. The host's input delay and rollback window apply to both peers.
 
 **Two editors on one machine (ParrelSync).** Open **ParrelSync > Clones Manager**, create a clone and open it. Press Play in both: the original editor hosts and the clone joins localhost automatically (turn off *Auto Start With ParrelSync* on *Network Match* to use the menu instead). Never edit files in the clone; it shares this project's assets.
 
-**Simulated network conditions.** The readout has a toggle for FishNet's latency simulator (latency, packet loss, out-of-order) on that peer's outgoing traffic; set it on both peers for a two-way delay.
+**Simulated network conditions.** The F1 overlay has a toggle for FishNet's latency simulator (latency, packet loss, out-of-order) on that peer's outgoing traffic; set it on both peers for a two-way delay.
 
 ## Measuring determinism with Tickwise
 

@@ -4,6 +4,7 @@ using FishNet.Transporting.Tugboat;
 using NetcodeSample.Game;
 using NetcodeSample.Game.Local;
 using NetcodeSample.Game.Network;
+using NetcodeSample.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -59,10 +60,13 @@ namespace NetcodeSample.Editor
             serialized.FindProperty("_level").objectReferenceValue = level;
             serialized.FindProperty("_rules").objectReferenceValue = rules;
             serialized.FindProperty("_presentation").objectReferenceValue = PresentationAssets.LoadOrCreate();
+            MatchUI ui = MatchUIBuilder.FindOrBuild();
+            serialized.FindProperty("_ui").objectReferenceValue = ui;
             serialized.ApplyModifiedProperties();
 
             SetActive(networkManager.gameObject, true);
             SetActive(runner.gameObject, true);
+            SetActive(ui.gameObject, true);
             LocalMatchRunner localRunner = Object.FindAnyObjectByType<LocalMatchRunner>(FindObjectsInactive.Include);
             if (localRunner != null)
             {

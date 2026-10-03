@@ -6,6 +6,7 @@ using NetcodeSample.Networking;
 using NetcodeSample.Presentation;
 using NetcodeSample.Rollback;
 using NetcodeSample.Simulation;
+using NetcodeSample.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -13,8 +14,9 @@ namespace NetcodeSample.Game.Network
 {
     /// <summary>
     /// A two-player peer-to-peer rollback match over FishNet. One peer hosts, the other joins by address; each
-    /// simulates the whole game and they exchange only inputs. Space spawns this peer's big cube. Both peers record
-    /// their confirmed ticks with Tickwise, named by session and team so the pair compares directly.
+    /// simulates the whole game and they exchange only inputs. Space (or the HUD button) spawns this peer's big
+    /// cube; F1 shows the netcode overlay. Both peers record their confirmed ticks with Tickwise, named by session
+    /// and team so the pair compares directly.
     /// </summary>
     public sealed class NetworkMatchRunner : MonoBehaviour
     {
@@ -35,7 +37,10 @@ namespace NetcodeSample.Game.Network
         [SerializeField]
         private PresentationSettings _presentation;
 
-        [Header("Connection")]
+        [SerializeField]
+        private MatchUI _ui;
+
+        [Header("Connection (defaults shown in the main menu)")]
         [SerializeField]
         private string _address = "127.0.0.1";
 
@@ -59,7 +64,7 @@ namespace NetcodeSample.Game.Network
         [Range(1, 15)]
         private int _maxRollbackTicks = 8;
 
-        [Header("FishNet latency simulator (this peer's outgoing traffic)")]
+        [Header("FishNet latency simulator (this peer's outgoing traffic; also on the F1 overlay)")]
         [SerializeField]
         private bool _simulateLatency;
 
@@ -89,13 +94,13 @@ namespace NetcodeSample.Game.Network
         private float _tickSeconds;
         private float _accumulator;
         private bool _pendingSpawnBig;
-        private string _lastMessage = string.Empty;
+        private bool _autoStartPending;
 
         private void Start()
         {
-            if (_networkManager == null || _level == null || _rules == null || _presentation == null)
+            if (_networkManager == null || _level == null || _rules == null || _presentation == null || _ui == null)
             {
-                Debug.LogError("NetworkMatchRunner needs a Network Manager, Level Definition, Game Rules and Presentation Settings. Run Netcode Sample > Set Up Network Match Scene.", this);
+                Debug.LogError("NetworkMatchRunner needs a Network Manager, Level Definition, Game Rules, Presentation Settings and Match UI. Run Netcode Sample > Set Up Network Match Scene.", this);
                 enabled = false;
                 return;
             }
@@ -105,19 +110,22 @@ namespace NetcodeSample.Game.Network
             _tickSeconds = 1f / _gameRules.TickRate;
             _networkManager.TimeManager.SetTickRate(TransportTickRate);
             CameraFraming.FrameBases(_levelData);
+
+            _ui.MainMenu.SetDefaults(_address, _port, _hostTeam);
+            _ui.MainMenu.HostRequested += OnHostRequested;
+            _ui.MainMenu.JoinRequested += OnJoinRequested;
+            _ui.Connecting.CancelRequested += OnCancelRequested;
+            _ui.Hud.SpawnBigRequested += OnSpawnBigRequested;
+            _ui.Hud.LeaveRequested += OnLeaveRequested;
+            _ui.DebugOverlay.ConditionsChanged += OnConditionsChanged;
+            _ui.DebugOverlay.ChaosToggled += OnChaosToggled;
+            _ui.DebugOverlay.SetConditions(new SimulatedConditions { Enabled = _simulateLatency, LatencyMs = _latencyMs, PacketLoss = _packetLoss, OutOfOrder = _outOfOrder });
+            _ui.DebugOverlay.SetVisible(false);
+
             PrepareMatch();
 
-            if (_autoStartWithParrelSync && TryGetParrelSyncRole(out bool isClone))
-            {
-                if (isClone)
-                {
-                    Join();
-                }
-                else
-                {
-                    Host();
-                }
-            }
+            // Started from the first Update, after the UI director has shown its start screen.
+            _autoStartPending = _autoStartWithParrelSync && TryGetParrelSyncRole(out _);
         }
 
         // A fresh simulation and peer, ready to host or join.
@@ -128,18 +136,61 @@ namespace NetcodeSample.Game.Network
             _peer.MatchReady += OnMatchReady;
             _accumulator = 0f;
             _pendingSpawnBig = false;
+            _ui.DebugOverlay.SetChaos(false, 0);
         }
 
-        private void Host()
+        private void OnHostRequested(ushort port, Team hostTeam)
         {
+            _port = port;
+            _hostTeam = hostTeam;
             ApplyLatencySimulation();
             _peer.Host(_port, _hostTeam, new RollbackSettings { InputDelayTicks = _inputDelayTicks, MaxRollbackTicks = _maxRollbackTicks });
+            _ui.ShowConnecting(_peer.StatusMessage);
         }
 
-        private void Join()
+        private void OnJoinRequested(string address, ushort port)
         {
+            _address = address;
+            _port = port;
             ApplyLatencySimulation();
             _peer.Join(_address, _port);
+            _ui.ShowConnecting(_peer.StatusMessage);
+        }
+
+        private void OnCancelRequested()
+        {
+            ResetToMenu("Cancelled.");
+        }
+
+        private void OnLeaveRequested()
+        {
+            ResetToMenu("You left the match.");
+        }
+
+        private void OnSpawnBigRequested()
+        {
+            _pendingSpawnBig = true;
+        }
+
+        private void OnChaosToggled()
+        {
+            if (_session == null)
+            {
+                return;
+            }
+
+            ChaosSettings chaos = _simulation.Chaos;
+            _simulation.Chaos = new ChaosSettings { Enabled = !chaos.Enabled, FromTick = _simulation.Tick + 1 };
+            _ui.DebugOverlay.SetChaos(_simulation.Chaos.Enabled, _simulation.Chaos.FromTick);
+        }
+
+        private void OnConditionsChanged(SimulatedConditions conditions)
+        {
+            _simulateLatency = conditions.Enabled;
+            _latencyMs = conditions.LatencyMs;
+            _packetLoss = conditions.PacketLoss;
+            _outOfOrder = conditions.OutOfOrder;
+            ApplyLatencySimulation();
         }
 
         private void OnMatchReady()
@@ -156,28 +207,51 @@ namespace NetcodeSample.Game.Network
 
             _presenter = new MatchPresenter(_simulation, _presentation);
             _session = new RollbackSession(_simulation, _peer.LocalTeam, _peer, _peer.Settings, new CompositeTickObserver(_recorder, _presenter));
+            _ui.ShowHud();
             Debug.Log($"Network match {_peer.SessionId}: playing {_peer.LocalTeam} as {(_peer.IsHost ? "host" : "joiner")}, input delay {_peer.Settings.InputDelayTicks}, max rollback {_peer.Settings.MaxRollbackTicks}.", this);
         }
 
         private void Update()
         {
+            if (_peer == null)
+            {
+                return;
+            }
+
+            Keyboard keyboard = Keyboard.current;
+            if (keyboard != null && keyboard.f1Key.wasPressedThisFrame)
+            {
+                _ui.DebugOverlay.SetVisible(!_ui.DebugOverlay.IsVisible);
+            }
+
+            if (_autoStartPending)
+            {
+                _autoStartPending = false;
+                TryGetParrelSyncRole(out bool isClone);
+                if (isClone)
+                {
+                    OnJoinRequested(_address, _port);
+                }
+                else
+                {
+                    OnHostRequested(_port, _hostTeam);
+                }
+            }
+
             if (_session == null)
             {
+                UpdateConnecting();
                 return;
             }
 
             if (_peer.State != PeerState.Ready)
             {
-                EndMatch(_peer.StatusMessage);
+                ResetToMenu(_peer.StatusMessage);
                 return;
             }
 
-            Keyboard keyboard = Keyboard.current;
-            if (keyboard != null)
-            {
-                // Latched until a tick consumes it, so a press between ticks (or during a stall) is never lost.
-                _pendingSpawnBig |= keyboard.spaceKey.wasPressedThisFrame;
-            }
+            // Latched until a tick consumes it, so a press between ticks (or during a stall) is never lost.
+            _pendingSpawnBig |= keyboard != null && keyboard.spaceKey.wasPressedThisFrame;
 
             _accumulator += Time.deltaTime;
             int steps = 0;
@@ -199,15 +273,78 @@ namespace NetcodeSample.Game.Network
             }
 
             _presenter.Render(_accumulator / _tickSeconds, Time.deltaTime);
+            RefreshMatchUI();
         }
 
-        // Finishes the recording and resets to the menu with a fresh simulation.
-        private void EndMatch(string message)
+        private void UpdateConnecting()
         {
-            _lastMessage = message;
-            Debug.Log($"Network match ended: {message}", this);
+            switch (_peer.State)
+            {
+                case PeerState.Connecting:
+                case PeerState.WaitingForPeer:
+                    _ui.Connecting.SetStatus(_peer.StatusMessage);
+                    break;
+                case PeerState.Failed:
+                case PeerState.Disconnected:
+                    ResetToMenu(_peer.StatusMessage);
+                    break;
+            }
+
+            _ui.DebugOverlay.SetStats($"Not in a match. {_peer.StatusMessage}\n[F1] hide");
+        }
+
+        private void RefreshMatchUI()
+        {
+            ref readonly MatchState match = ref _simulation.Match;
+            ref readonly TeamState red = ref _simulation.GetTeam(Team.Red);
+            ref readonly TeamState blue = ref _simulation.GetTeam(Team.Blue);
+            ref readonly TeamState local = ref _simulation.GetTeam(_peer.LocalTeam);
+            float bigCooldownSeconds = local.BigCooldown.ToFloat() / _gameRules.TickRate;
+            float bigCooldownTotal = _gameRules.BigCooldown.ToFloat();
+
+            _ui.Hud.Refresh(new HudState
+            {
+                LocalTeam = _peer.LocalTeam,
+                Round = match.Round,
+                RedScore = red.Score,
+                BlueScore = blue.Score,
+                RedBaseHealth = red.BaseHealth / (float)_gameRules.BaseHealth,
+                BlueBaseHealth = blue.BaseHealth / (float)_gameRules.BaseHealth,
+                BigCooldown = bigCooldownTotal > 0f ? bigCooldownSeconds / bigCooldownTotal : 0f,
+                BigCooldownSeconds = bigCooldownSeconds,
+            });
+
+            if (match.RoundPauseTicks > 0)
+            {
+                _ui.ShowRoundEnd(match.LastRoundResult, _peer.LocalTeam, red.Score, blue.Score, match.RoundPauseTicks / (float)_gameRules.TickRate);
+            }
+            else if (_ui.IsRoundEndShown)
+            {
+                _ui.HideRoundEnd();
+            }
+
+            RollbackStats stats = _session.Stats;
+            string rtt = _peer.RoundTripTimeMs >= 0 ? $"{_peer.RoundTripTimeMs} ms" : "n/a (host)";
+            string recording = _recorder != null ? Path.GetFileName(_recorder.Recorder.Path) : "off";
+            _ui.DebugOverlay.SetStats(
+                $"session {_peer.SessionId}   {_peer.LocalTeam} {(_peer.IsHost ? "host" : "joiner")}   [F1] hide\n" +
+                $"tick {_session.CurrentTick}   confirmed {_session.ConfirmedTick}   remote inputs to {_session.RemoteInputTick}\n" +
+                $"rollbacks {stats.Rollbacks}   max depth {stats.MaxRollbackDepth}   re-simulated {stats.ResimulatedTicks}\n" +
+                $"stalls {stats.StalledTicks}   skips {stats.SkippedTicks}   advantage {_session.FrameAdvantage:+0.0;-0.0}   rtt {rtt}\n" +
+                $"input delay {_session.Settings.InputDelayTicks}   max rollback {_session.Settings.MaxRollbackTicks}   recording {recording}");
+        }
+
+        // Finishes the recording and goes back to the main menu with a fresh simulation.
+        private void ResetToMenu(string message)
+        {
+            if (_session != null)
+            {
+                Debug.Log($"Network match ended: {message}", this);
+            }
+
             TearDown();
             PrepareMatch();
+            _ui.ShowMainMenu(message);
         }
 
         private void TearDown()
@@ -222,156 +359,31 @@ namespace NetcodeSample.Game.Network
             }
 
             _session = null;
-            _peer?.Dispose();
-            _peer = null;
+            if (_peer != null)
+            {
+                _peer.MatchReady -= OnMatchReady;
+                _peer.Dispose();
+                _peer = null;
+            }
+
             _simulation?.Dispose();
             _simulation = null;
         }
 
         private void OnDestroy()
         {
+            if (_ui != null)
+            {
+                _ui.MainMenu.HostRequested -= OnHostRequested;
+                _ui.MainMenu.JoinRequested -= OnJoinRequested;
+                _ui.Connecting.CancelRequested -= OnCancelRequested;
+                _ui.Hud.SpawnBigRequested -= OnSpawnBigRequested;
+                _ui.Hud.LeaveRequested -= OnLeaveRequested;
+                _ui.DebugOverlay.ConditionsChanged -= OnConditionsChanged;
+                _ui.DebugOverlay.ChaosToggled -= OnChaosToggled;
+            }
+
             TearDown();
-        }
-
-        private void OnGUI()
-        {
-            GUILayout.BeginArea(new Rect(10, 10, 640, 330), GUI.skin.box);
-            if (_session == null)
-            {
-                DrawMenu();
-            }
-            else
-            {
-                DrawMatch();
-            }
-
-            GUILayout.EndArea();
-        }
-
-        // A stand-in for the HannibalUI main menu of phase 8.
-        private void DrawMenu()
-        {
-            GUILayout.Label("Peer-to-peer rollback match (FishNet)");
-            if (_peer == null)
-            {
-                return;
-            }
-
-            if (_peer.State == PeerState.Idle || _peer.State == PeerState.Failed)
-            {
-                if (_peer.State == PeerState.Failed)
-                {
-                    GUILayout.Label(_peer.StatusMessage);
-                    if (GUILayout.Button("Back"))
-                    {
-                        TearDown();
-                        PrepareMatch();
-                    }
-
-                    return;
-                }
-
-                if (!string.IsNullOrEmpty(_lastMessage))
-                {
-                    GUILayout.Label($"Last match: {_lastMessage}");
-                }
-
-                GUILayout.BeginHorizontal();
-                GUILayout.Label("Port", GUILayout.Width(60));
-                if (ushort.TryParse(GUILayout.TextField(_port.ToString(), GUILayout.Width(80)), out ushort port))
-                {
-                    _port = port;
-                }
-
-                GUILayout.Label("Host plays", GUILayout.Width(80));
-                if (GUILayout.Button(_hostTeam.ToString(), GUILayout.Width(80)))
-                {
-                    _hostTeam = _hostTeam.Opponent();
-                }
-
-                if (GUILayout.Button("Host"))
-                {
-                    Host();
-                }
-
-                GUILayout.EndHorizontal();
-
-                GUILayout.BeginHorizontal();
-                GUILayout.Label("Address", GUILayout.Width(60));
-                _address = GUILayout.TextField(_address, GUILayout.Width(160));
-                if (GUILayout.Button("Join"))
-                {
-                    Join();
-                }
-
-                GUILayout.EndHorizontal();
-                DrawLatencyControls();
-                return;
-            }
-
-            GUILayout.Label(_peer.StatusMessage);
-            if (GUILayout.Button("Cancel"))
-            {
-                TearDown();
-                PrepareMatch();
-            }
-        }
-
-        private void DrawMatch()
-        {
-            ref readonly MatchState match = ref _simulation.Match;
-            ref readonly TeamState red = ref _simulation.GetTeam(Team.Red);
-            ref readonly TeamState blue = ref _simulation.GetTeam(Team.Blue);
-            string pause = match.RoundPauseTicks > 0 ? $"   {match.LastRoundResult}, next round in {match.RoundPauseTicks / (float)_gameRules.TickRate:0.0}s" : string.Empty;
-            string you = _peer.LocalTeam.ToString().ToUpperInvariant();
-
-            GUILayout.Label($"{_peer.StatusMessage}   session {_peer.SessionId}   round {match.Round + 1}{pause}");
-            GUILayout.Label($"RED   score {red.Score}   base {red.BaseHealth}   cubes {red.UnitCount}   big cooldown {red.BigCooldown.ToFloat() / _gameRules.TickRate:0.0}s");
-            GUILayout.Label($"BLUE  score {blue.Score}   base {blue.BaseHealth}   cubes {blue.UnitCount}   big cooldown {blue.BigCooldown.ToFloat() / _gameRules.TickRate:0.0}s");
-            GUILayout.Label($"You are {you}: Space spawns your big cube.");
-
-            RollbackStats stats = _session.Stats;
-            string rtt = _peer.RoundTripTimeMs >= 0 ? $"   rtt {_peer.RoundTripTimeMs} ms" : string.Empty;
-            GUILayout.Label($"tick {_session.CurrentTick}   confirmed {_session.ConfirmedTick}   rollbacks {stats.Rollbacks} (max {stats.MaxRollbackDepth} ticks)   stalls {stats.StalledTicks}   skips {stats.SkippedTicks}   advantage {_session.FrameAdvantage:+0.0;-0.0}{rtt}");
-            GUILayout.Label(_recorder != null ? $"recording {Path.GetFileName(_recorder.Recorder.Path)}" : "not recording");
-
-            DrawLatencyControls();
-
-            ChaosSettings chaos = _simulation.Chaos;
-            string label = chaos.Enabled ? $"CHAOS ON on this peer from tick {chaos.FromTick} (click to stop)" : "Chaos off (click to plant the bug on this peer only)";
-            if (GUILayout.Button(label))
-            {
-                _simulation.Chaos = new ChaosSettings { Enabled = !chaos.Enabled, FromTick = _simulation.Tick + 1 };
-            }
-
-            if (GUILayout.Button("Leave match"))
-            {
-                EndMatch("You left.");
-            }
-        }
-
-        private void DrawLatencyControls()
-        {
-            bool changed = false;
-            bool simulate = GUILayout.Toggle(_simulateLatency, " Simulate latency on this peer's outgoing traffic (FishNet)");
-            changed |= simulate != _simulateLatency;
-            _simulateLatency = simulate;
-            if (_simulateLatency)
-            {
-                GUILayout.Label($"latency {_latencyMs} ms   packet loss {_packetLoss:P0}   out of order {_outOfOrder:P0}");
-                int latency = Mathf.RoundToInt(GUILayout.HorizontalSlider(_latencyMs, 0f, 500f));
-                float loss = GUILayout.HorizontalSlider(_packetLoss, 0f, 0.5f);
-                float outOfOrder = GUILayout.HorizontalSlider(_outOfOrder, 0f, 0.5f);
-                changed |= latency != _latencyMs || !Mathf.Approximately(loss, _packetLoss) || !Mathf.Approximately(outOfOrder, _outOfOrder);
-                _latencyMs = latency;
-                _packetLoss = loss;
-                _outOfOrder = outOfOrder;
-            }
-
-            if (changed)
-            {
-                ApplyLatencySimulation();
-            }
         }
 
         private void ApplyLatencySimulation()
