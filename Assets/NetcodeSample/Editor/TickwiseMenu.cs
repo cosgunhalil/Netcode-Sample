@@ -1,12 +1,8 @@
-using System;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using NetcodeSample.Determinism;
 using NetcodeSample.Game;
 using UnityEditor;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace NetcodeSample.Editor
 {
@@ -97,42 +93,21 @@ namespace NetcodeSample.Editor
         // Runs the tickwise CLI and logs its output; exit code 0 = identical, 1 = difference, 2 = error.
         private static void RunCli(string arguments)
         {
-            string cargoCli = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".cargo", "bin", "tickwise.exe");
-            foreach (string executable in new[] { "tickwise", cargoCli })
+            if (!TickwiseCli.TryRun(arguments, out int exitCode, out string output))
             {
-                ProcessStartInfo start = new(executable, arguments)
-                {
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true,
-                };
-                start.EnvironmentVariables["NO_COLOR"] = "1";
-
-                try
-                {
-                    using Process process = Process.Start(start);
-                    string output = process.StandardOutput.ReadToEnd() + process.StandardError.ReadToEnd();
-                    process.WaitForExit();
-                    string message = $"tickwise {arguments}\n(exit code {process.ExitCode})\n{output}";
-                    if (process.ExitCode == 0)
-                    {
-                        Debug.Log(message);
-                    }
-                    else
-                    {
-                        Debug.LogWarning(message);
-                    }
-
-                    return;
-                }
-                catch (Win32Exception)
-                {
-                    // Not found under this name; try the next.
-                }
+                Debug.LogWarning($"{output}\nRun it yourself:\ntickwise {arguments}");
+                return;
             }
 
-            Debug.LogWarning($"The tickwise CLI isn't installed (run tools/build-tickwise.ps1 -InstallCli). Run it yourself:\ntickwise {arguments}");
+            string message = $"tickwise {arguments}\n(exit code {exitCode})\n{output}";
+            if (exitCode == 0)
+            {
+                Debug.Log(message);
+            }
+            else
+            {
+                Debug.LogWarning(message);
+            }
         }
     }
 }

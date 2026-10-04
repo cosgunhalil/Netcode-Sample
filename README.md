@@ -104,14 +104,14 @@ Under rollback a peer records a tick only once it's **confirmed** (both players'
 1. Start a network match with ParrelSync (or Loopback mode).
 2. Play for a few seconds, then press **F1** in the *host* and click **Plant chaos on this peer**. From the next tick, that peer's new cubes take their spawn offset from the wall clock instead of the spawn counter: a realistic determinism bug, on one machine only.
 3. Play a few more seconds and stop both editors.
-4. Run **Netcode Sample > Tickwise > Compare Two Recordings...** and pick the session's red and blue files. The Console shows `tickwise compare`:
+4. Open **Netcode Sample > Tickwise > Comparison Window**, pick the session (red and blue recordings are paired automatically) and click **Compare**. The window shows the verdict and, when the recordings diverged, diffs the first state dump after the divergence straight away: a sortable, filterable table of the differing fields, plus which unit slots are involved. Pick another dump tick to see how the divergence spread. The same verdict in text, from `tickwise compare`:
 
    ```text
    verdict  first divergence at tick 301, caught by the light hash, confirmed by the full hash at tick 330, last agreement at tick 300
    next     tickwise diff online-...-red.rec online-...-blue.rec --at 450
    ```
 
-5. Run the suggested diff (from a terminal in the recordings folder) to see which fields diverged:
+5. The diff behind the table, which you can also run from a terminal in the recordings folder:
 
    ```bash
    tickwise diff online-<session>-red.rec online-<session>-blue.rec --at 450
@@ -127,6 +127,10 @@ Under rollback a peer records a tick only once it's **confirmed** (both players'
    The first diverging units are the cubes spawned right after the bug was planted, which points straight at the spawn code.
 
 Without chaos, the same comparison reports `identical over N compared ticks`, also under heavy simulated packet loss.
+
+### Comparison window
+
+**Netcode Sample > Tickwise > Comparison Window** compares any two recordings with the CLI and shows the result: pick a session (a network or loopback session's red and blue files, or a recording and its self-check replay) or any two files, and click **Compare**. It shows the verdict, the first divergent and last agreeing ticks, the dump ticks both recordings share, and for a chosen dump the differing fields (kind, field, both values, float delta), sortable by column and filterable by field name; the raw CLI output is in a foldout. It needs the `tickwise` CLI ([local build](#tickwise-local-build)).
 
 ### Self-check (one recording)
 
